@@ -23,7 +23,7 @@ returns
 // -- if the file already exists, return an "ERROR: FILE EXISTS\n" error
 // -- in general, return "ERROR: <error-description>\n" if unsuccessful
 // -- return "ACK\n" if successful
-int store(char* filename,
+int command_store(char* filename,
     char* filesize,
     char* filedata)
 {
@@ -52,7 +52,7 @@ returns
 // -- in general, return "ERROR: <error-description>\n" if unsuccessful
 // -- return "ACK" if successful, following it with the length and data, as follows:
 //    ACK <bytes>\n<file-excerpt>
-int read(char* filename,
+int command_read(char* filename,
     char* byteoffset,
     char* length,
     char* destination)
@@ -73,7 +73,7 @@ returns
 // -- if the file does not exist, return an "ERROR: NO SUCH FILE\n" error
 // -- in general, return "ERROR: <error-description>\n" if unsuccessful
 // -- return "ACK\n" if successful
-int delete(char* filename)
+int command_delete(char* filename)
 {
   return 0;
 }
@@ -92,7 +92,7 @@ returns
 // -- the format of the message containing the list of files is as follows:
 // <number-of-files>\n<filename1>\n<filename2>\n...\n
 // -- therefore, if no files are stored, "0\n" is returned
-int dir(char* destination)
+int command_dir(char* destination)
 {
   return 0;
 }
