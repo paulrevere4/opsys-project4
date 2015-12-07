@@ -10,11 +10,10 @@
 
 /**
 store
-  -Stores the file described by the arguments
+  -Stores the file described by the arguments in the file <filename> that is the
+  length <bytes> with the contents <file-contents>
 args
-  -char* filename - string for the name of the file we will store in
-  -char* filesize - string for the size (in bytes) of the file
-  -char* filedata - string for the data contained in the file
+  -char* query - the query sent to the server
 returns
   -int - 1 if sucess, 0 if false
 */
@@ -23,9 +22,7 @@ returns
 // -- if the file already exists, return an "ERROR: FILE EXISTS\n" error
 // -- in general, return "ERROR: <error-description>\n" if unsuccessful
 // -- return "ACK\n" if successful
-int command_store(char* filename,
-    char* filesize,
-    char* filedata)
+int command_store(char* query)
 {
 
   return 0;
@@ -36,9 +33,7 @@ read
   -Reads <length> bytes from the file <filename> starting at the index <offset>
   of the file. Puts them in the <destination> pointer given
 args
-  -char* filename - the name of the file to be read from
-  -char* byteoffset - index to start reading from
-  -char* length - number of bytes to read
+  -char* query - the query sent to the server
   -char* destination - destination for the bytes to be read to
 returns
   -int - the number of bytes read, the size of the string <destination>
@@ -52,10 +47,7 @@ returns
 // -- in general, return "ERROR: <error-description>\n" if unsuccessful
 // -- return "ACK" if successful, following it with the length and data, as follows:
 //    ACK <bytes>\n<file-excerpt>
-int command_read(char* filename,
-    char* byteoffset,
-    char* length,
-    char* destination)
+int command_read(char* query, char* destination)
 {
   return 0;
 }
@@ -64,7 +56,7 @@ int command_read(char* filename,
 delete
   -Deletes the file with the name <filename>
 args
-  -char* filename - name of the file to delete
+  -char* query - the query sent to the server
 returns
   -int - 1 if sucess, 0 if false
 */
@@ -73,7 +65,7 @@ returns
 // -- if the file does not exist, return an "ERROR: NO SUCH FILE\n" error
 // -- in general, return "ERROR: <error-description>\n" if unsuccessful
 // -- return "ACK\n" if successful
-int command_delete(char* filename)
+int command_delete(char* query)
 {
   return 0;
 }
@@ -82,7 +74,7 @@ int command_delete(char* filename)
 dir
   -Makes a string that shows the files in the directory
 args
-  -char* destination - destination for the string to be written to
+  -char* query - the query sent to the server
 returns
   -int - the size of the string <destination>
 */
@@ -92,11 +84,68 @@ returns
 // -- the format of the message containing the list of files is as follows:
 // <number-of-files>\n<filename1>\n<filename2>\n...\n
 // -- therefore, if no files are stored, "0\n" is returned
-int command_dir(char* destination)
+int command_dir(char* query)
 {
   return 0;
 }
 
+/**
+getQueryType
+  -gets the type of query sent so that the correct function can be called
+args
+  -char* query - the query to parse
+returns
+  -int:
+    0 for read error
+    1 for STORE
+    2 for READ
+    3 for DELETE
+    4 for DIR
+*/
+int getQueryType(char* query)
+{
+  return 0;
+}
+
+/**
+readQuery
+  -reads the query sent to the server and prepares the response
+args
+  -char* query - the query from the client
+  -char* destination - destination for the response to be written to
+returns
+  -int - size of the string <destination>
+*/
+int readQuery(char* query, char* destination)
+{
+  int queryType = getQueryType(query);
+  if ( queryType == 1 )
+  {
+    //STORE
+    printf("STORE\n");
+  }
+  else if ( queryType == 2 )
+  {
+    //READ
+    printf("READ\n");
+  }
+  else if ( queryType == 3 )
+  {
+    //DELETE
+    printf("DELETE\n");
+  }
+  else if ( queryType == 4 )
+  {
+    //DIR
+    printf("DIR\n");
+  }
+  else
+  {
+    //error
+    printf("ERROR: unrecognized query\n");
+  }
+  return 0;
+}
 
 int main( )
 {
