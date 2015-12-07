@@ -1,12 +1,13 @@
-#include <sys/types.h>
-#include <sys/socket.h>
-
-#include <netinet/in.h>
+// This the submission for Paul Revere(reverp) and Joseph Hitchcock(hitchj)
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
+
+#include <netinet/in.h>
 #include <arpa/inet.h>
+#include <sys/types.h>
+#include <sys/socket.h>
 
 /**
 store
@@ -90,6 +91,37 @@ int command_dir(char* query)
 }
 
 /**
+streq
+  -checks if two strings are equal
+args
+  -char* str1 - string 1
+  -char* str2 - string 2
+returns
+  int - 1 if they're equal, 0 if not.
+*/
+int streq(char* str1, char* str2)
+{
+  unsigned int i;
+  int result = 1;
+  if ( strlen(str1) != strlen(str2) )
+  {
+    result = 0;
+  }
+  else
+  {
+    for ( i = 0; str1[i] != '\0' && str2[i] != '\0'; i++ )
+    {
+      if ( str1[i] != str2[i] )
+      {
+        result = 0;
+        break;
+      }
+    }
+  }
+  return result;
+}
+
+/**
 getQueryType
   -gets the type of query sent so that the correct function can be called
 args
@@ -104,7 +136,39 @@ returns
 */
 int getQueryType(char* query)
 {
-  return 0;
+  unsigned int len = strlen(query);
+  unsigned int i = 0;
+  int result = 0;
+  while( i < len && query[i] == ' ' )
+  {
+    i++;
+  }
+  char command[7];
+  unsigned int commandIndex = 0;
+  while( i < len && query[i] != ' ' && query[i] != '\n')
+  {
+    command[commandIndex] = query[i];
+    commandIndex++;
+    i++;
+  }
+  command[commandIndex] = '\0';
+  if ( streq(command, "STORE") == 1 )
+  {
+    result = 1;
+  }
+  else if ( streq(command, "READ") == 1 )
+  {
+    result = 2;
+  }
+  else if ( streq(command, "DELETE") == 1 )
+  {
+    result = 3;
+  }
+  else if ( streq(command, "DIR") == 1 )
+  {
+    result = 4;
+  }
+  return result;
 }
 
 /**
@@ -192,6 +256,7 @@ int main( )
 
     printf("THREAD: Blocked on read()\n");
 
+    bzero(buffer, 1024);
     int n = read(newsock, buffer, 1024);
 
     if (n < 0)
@@ -200,7 +265,9 @@ int main( )
         exit(EXIT_FAILURE);
     }
 
-    printf("MESSAGE: %s", buffer);
+    printf("MESSAGE: '%s'\n", buffer);
+    char* resMsg = (char*)calloc(1, sizeof(char));
+    int resStat = readQuery(buffer, resMsg);
 
   }
 
