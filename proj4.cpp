@@ -12,6 +12,8 @@
 #include <iostream>
 #include <string>
 
+#include "disk.h"
+
 /**
 store
   -Stores the file described by the arguments in the file <filename> that is the
