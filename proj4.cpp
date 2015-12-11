@@ -115,28 +115,25 @@ int getQueryType(char* query)
   {
     i++;
   }
-  char command[7];
-  unsigned int commandIndex = 0;
+  std::string command;
   while( i < len && query[i] != ' ' && query[i] != '\n')
   {
-    command[commandIndex] = query[i];
-    commandIndex++;
+    command += query[i];
     i++;
   }
-  command[commandIndex] = '\0';
-  if ( std::string(command) == "STORE" )
+  if ( command == "STORE" )
   {
     result = 1;
   }
-  else if ( std::string(command) == "READ" )
+  else if ( command == "READ" )
   {
     result = 2;
   }
-  else if ( std::string(command) == "DELETE" )
+  else if ( command == "DELETE" )
   {
     result = 3;
   }
-  else if ( std::string(command) == "DIR" )
+  else if ( command == "DIR" )
   {
     result = 4;
   }
