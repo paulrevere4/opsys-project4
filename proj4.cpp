@@ -9,6 +9,9 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
+#include <iostream>
+#include <string>
+
 /**
 store
   -Stores the file described by the arguments in the file <filename> that is the
@@ -91,37 +94,6 @@ int command_dir(char* query)
 }
 
 /**
-streq
-  -checks if two strings are equal
-args
-  -char* str1 - string 1
-  -char* str2 - string 2
-returns
-  int - 1 if they're equal, 0 if not.
-*/
-int streq(char* str1, char* str2)
-{
-  unsigned int i;
-  int result = 1;
-  if ( strlen(str1) != strlen(str2) )
-  {
-    result = 0;
-  }
-  else
-  {
-    for ( i = 0; str1[i] != '\0' && str2[i] != '\0'; i++ )
-    {
-      if ( str1[i] != str2[i] )
-      {
-        result = 0;
-        break;
-      }
-    }
-  }
-  return result;
-}
-
-/**
 getQueryType
   -gets the type of query sent so that the correct function can be called
 args
@@ -152,19 +124,19 @@ int getQueryType(char* query)
     i++;
   }
   command[commandIndex] = '\0';
-  if ( streq(command, "STORE") == 1 )
+  if ( std::string(command) == "STORE" )
   {
     result = 1;
   }
-  else if ( streq(command, "READ") == 1 )
+  else if ( std::string(command) == "READ" )
   {
     result = 2;
   }
-  else if ( streq(command, "DELETE") == 1 )
+  else if ( std::string(command) == "DELETE" )
   {
     result = 3;
   }
-  else if ( streq(command, "DIR") == 1 )
+  else if ( std::string(command) == "DIR" )
   {
     result = 4;
   }
