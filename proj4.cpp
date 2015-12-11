@@ -26,9 +26,8 @@ returns
 // -- if the file already exists, return an "ERROR: FILE EXISTS\n" error
 // -- in general, return "ERROR: <error-description>\n" if unsuccessful
 // -- return "ACK\n" if successful
-int command_store(char* query)
+bool command_store(char* query)
 {
-
   return 0;
 }
 
@@ -51,7 +50,7 @@ returns
 // -- in general, return "ERROR: <error-description>\n" if unsuccessful
 // -- return "ACK" if successful, following it with the length and data, as follows:
 //    ACK <bytes>\n<file-excerpt>
-int command_read(char* query, char* destination)
+bool command_read(char* query, char* destination)
 {
   return 0;
 }
@@ -69,7 +68,7 @@ returns
 // -- if the file does not exist, return an "ERROR: NO SUCH FILE\n" error
 // -- in general, return "ERROR: <error-description>\n" if unsuccessful
 // -- return "ACK\n" if successful
-int command_delete(char* query)
+bool command_delete(char* query)
 {
   return 0;
 }
@@ -88,7 +87,7 @@ returns
 // -- the format of the message containing the list of files is as follows:
 // <number-of-files>\n<filename1>\n<filename2>\n...\n
 // -- therefore, if no files are stored, "0\n" is returned
-int command_dir(char* query)
+bool command_dir(char* query)
 {
   return 0;
 }
@@ -106,7 +105,7 @@ returns
     3 for DELETE
     4 for DIR
 */
-int getQueryType(char* query)
+std::string getQueryType(char* query)
 {
   unsigned int len = strlen(query);
   unsigned int i = 0;
@@ -121,23 +120,7 @@ int getQueryType(char* query)
     command += query[i];
     i++;
   }
-  if ( command == "STORE" )
-  {
-    result = 1;
-  }
-  else if ( command == "READ" )
-  {
-    result = 2;
-  }
-  else if ( command == "DELETE" )
-  {
-    result = 3;
-  }
-  else if ( command == "DIR" )
-  {
-    result = 4;
-  }
-  return result;
+  return command;
 }
 
 /**
@@ -151,23 +134,23 @@ returns
 */
 int readQuery(char* query, char* destination)
 {
-  int queryType = getQueryType(query);
-  if ( queryType == 1 )
+  std::string queryType = getQueryType(query);
+  if ( queryType == "STORE" )
   {
     //STORE
     printf("STORE\n");
   }
-  else if ( queryType == 2 )
+  else if ( queryType == "READ" )
   {
     //READ
     printf("READ\n");
   }
-  else if ( queryType == 3 )
+  else if ( queryType == "DELETE" )
   {
     //DELETE
     printf("DELETE\n");
   }
-  else if ( queryType == 4 )
+  else if ( queryType == "DIR" )
   {
     //DIR
     printf("DIR\n");
@@ -177,6 +160,7 @@ int readQuery(char* query, char* destination)
     //error
     printf("ERROR: unrecognized query\n");
   }
+
   return 0;
 }
 
