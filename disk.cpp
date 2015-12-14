@@ -43,8 +43,8 @@ void Disk::printCluster()
 //store a file
 //return the message the server should send back
 std::string Disk::storeFile(std::string filename,
-  int size,
-  char* contents)
+    int size,
+    char* contents)
 {
   if ( files.find(filename) == files.end() )
   {
@@ -67,8 +67,8 @@ std::string Disk::storeFile(std::string filename,
 //read contents from a file, read length bytes starting at the offset
 //return the message the server should send back
 std::string Disk::readFile(std::string filename,
-  int offset,
-  int length)
+    int offset,
+    int length)
 {
   if ( files.find(filename) != files.end() )
   {
