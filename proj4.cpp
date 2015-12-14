@@ -168,6 +168,8 @@ int readQuery(char* query, char* destination)
 
 int main( )
 {
+  // Disk disk;
+  // disk.printCluster();
 
   int sock = socket(PF_INET, SOCK_STREAM, 0);
 

@@ -1,52 +1,35 @@
 // This the submission for Paul Revere(reverp) and Joseph Hitchcock(hitchj)
 
+#ifndef DISK_H
+#define DISK_H
+
 // File system for Opsys Project 4
 #include <vector>
 #include <string>
+#include <set>
 
-class disk
+class Disk
 {
+private:
+
+  std::vector<char> allocation;
+  std::set<std::string> files;
+
 public:
 
-	//constructor
-	disk()
-	{}
-
-	//destructor
-	~disk();
-
-	//print
-	void printCluster()
-	{}
-
-	//store a file
-	bool storeFile(std::string filename,
+	Disk(); //constructor
+	~Disk(); //destructor
+	void printCluster(); //print
+	bool storeFile(std::string filename, //store a file
       int size,
-      char* contents)
-  {
-    return false;
-  }
-
+      char* contents);
   //read contents from a file, read length bytes starting at the offset
   std::string readFile(std::string filename,
       int offset,
-      int length)
-  {
-    return "";
-  }
-
-  //delete a file
-  bool deleteFile(std::string filename)
-  {
-    return false;
-  }
-
-  //show the files in the directory
-  std::string dir()
-  {
-    return "";
-  }
-
-private:
+      int length);
+  bool deleteFile(std::string filename); //delete a file
+  std::string dir(); //show the files in the directory
 
 };
+
+#endif
