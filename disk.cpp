@@ -122,9 +122,9 @@ std::string Disk::dir()
   }
   std::sort(fileNames.begin(), fileNames.end());
   char intBuff[11];
-  sprintf(intBuff, "%d", fileNames.length());
+  sprintf(intBuff, "%d", fileNames.size());
   std::string returnString = std::string(intBuff) + "\n";
-  for ( int i = 0; i < fileNames.length(); i++ )
+  for ( int i = 0; i < fileNames.size(); i++ )
   {
     returnString += fileNames[i] + "\n";
   }
