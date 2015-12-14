@@ -6,6 +6,7 @@
 #include <sstream>
 #include <set>
 #include <fstream>
+#include <algorithm>
 
 #include <stdlib.h>
 
@@ -113,5 +114,19 @@ std::string Disk::deleteFile(std::string filename)
 //show the files in the directory
 std::string Disk::dir()
 {
-  return "";
+  std::vector<std::string> fileNames;
+  std::set<std::string>::iterator itr;
+  for ( itr = files.begin(); itr != files.end(); itr++ )
+  {
+    fileNames.push_back(*itr);
+  }
+  std::sort(fileNames.begin(), fileNames.end());
+  char intBuff[11];
+  sprintf(intBuff, "%d", fileNames.length());
+  std::string returnString = std::string(intBuff) + "\n";
+  for ( int i = 0; i < fileNames.length(); i++ )
+  {
+    returnString += fileNames[i] + "\n";
+  }
+  return returnString;
 }
