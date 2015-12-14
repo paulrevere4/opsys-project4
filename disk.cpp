@@ -3,12 +3,17 @@
 #include <string>
 #include <set>
 
+#include <stdlib.h>
+
 #include "disk.h"
 
 //constructor
 Disk::Disk()
 {
   allocation = std::vector<char>(128, '.');
+  system("rm -rf .storage");
+  system("mkdir .storage");
+
 }
 
 //destructor
@@ -36,6 +41,7 @@ bool Disk::storeFile(std::string filename,
   int size,
   char* contents)
 {
+
 	return false;
 }
 
