@@ -26,7 +26,7 @@ public:
   std::string readFile(std::string filename, //read contents from a file,
       int offset,              // read length bytes starting at the offset
       int length);
-  bool deleteFile(std::string filename); //delete a file
+  std::string deleteFile(std::string filename); //delete a file
   std::string dir(); //show the files in the directory
 
 };

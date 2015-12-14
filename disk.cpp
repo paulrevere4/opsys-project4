@@ -84,7 +84,7 @@ std::string Disk::readFile(std::string filename,
     {
       return "ERROR: INVALID BYTE RANGE";
     }
-    char[11] intBuff;
+    char intBuff[11];
     sprintf(intBuff, "%d", length);
     std::string returnString = "ACK " + std::string(intBuff) + "\n";
     for ( int i = offset; i < offset + length; i++ )
@@ -96,9 +96,16 @@ std::string Disk::readFile(std::string filename,
 }
 
 //delete a file
-bool Disk::deleteFile(std::string filename)
+std::string Disk::deleteFile(std::string filename)
 {
-  return false;
+  if ( files.find(filename) != files.end() )
+  {
+    return "ERROR: NO SUCH FILE";
+  }
+  else
+  {
+    return "";
+  }
 }
 
 //show the files in the directory
