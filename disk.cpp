@@ -1,7 +1,11 @@
+// This the submission for Paul Revere(reverp) and Joseph Hitchcock(hitchj)
+
 #include <iostream>
 #include <vector>
 #include <string>
+#include <sstream>
 #include <set>
+#include <fstream>
 
 #include <stdlib.h>
 
@@ -37,20 +41,58 @@ void Disk::printCluster()
 }
 
 //store a file
-bool Disk::storeFile(std::string filename,
+//return the message the server should send back
+std::string Disk::storeFile(std::string filename,
   int size,
   char* contents)
 {
-
-	return false;
+  if ( files.find(filename) == files.end() )
+  {
+    return "ERROR: FILE EXISTS";
+  }
+  else
+  {
+    std::ofstream outFile(filename);
+    std::string outString = "";
+    for ( int i = 0; i < size; i++ )
+    {
+      outString += contents[i];
+    }
+    outFile << outString;
+    files.insert(filename);
+    return "ACK";
+  }
 }
 
 //read contents from a file, read length bytes starting at the offset
+//return the message the server should send back
 std::string Disk::readFile(std::string filename,
   int offset,
   int length)
 {
-  return "";
+  if ( files.find(filename) != files.end() )
+  {
+    return "ERROR: NO SUCH FILE";
+  }
+  else
+  {
+    std::ifstream inFile(filename);
+    std::stringstream ss;
+    ss << inFile.rdbuf();
+    std::string fileContents = ss.str();
+    if ( fileContents.length() < offset + length )
+    {
+      return "ERROR: INVALID BYTE RANGE";
+    }
+    char[11] intBuff;
+    sprintf(intBuff, "%d", length);
+    std::string returnString = "ACK " + std::string(intBuff) + "\n";
+    for ( int i = offset; i < offset + length; i++ )
+    {
+      returnString += fileContents[i];
+    }
+    return returnString;
+  }
 }
 
 //delete a file

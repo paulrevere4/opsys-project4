@@ -20,12 +20,11 @@ public:
 	Disk(); //constructor
 	~Disk(); //destructor
 	void printCluster(); //print
-	bool storeFile(std::string filename, //store a file
+	std::string storeFile(std::string filename, //store a file
       int size,
       char* contents);
-  //read contents from a file, read length bytes starting at the offset
-  std::string readFile(std::string filename,
-      int offset,
+  std::string readFile(std::string filename, //read contents from a file,
+      int offset,              // read length bytes starting at the offset
       int length);
   bool deleteFile(std::string filename); //delete a file
   std::string dir(); //show the files in the directory
