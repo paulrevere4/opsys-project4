@@ -104,7 +104,9 @@ std::string Disk::deleteFile(std::string filename)
   }
   else
   {
-    return "";
+    std::string command = "rm .storage/" + filename;
+    system(command.c_str());
+    return "ACK";
   }
 }
 
