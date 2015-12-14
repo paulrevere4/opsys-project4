@@ -11,8 +11,15 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
+using namespace std;
 
 #include "disk.h"
+
+typedef struct input {
+  char* contents;
+  int   socket;
+} input;
 
 /**
 store
@@ -166,7 +173,48 @@ int readQuery(char* query, char* destination)
   return 0;
 }
 
-int main( )
+/**
+clientListen
+  -threaded function to handle each individual client
+args
+  -void* argument - input struct containing arguments
+returns
+  -exits once read() call returns 0 (client exits)
+*/
+void* clientListen(void* argument)
+{
+  
+  int* newsock = (int*)argument;
+  
+  while(1)
+  {
+  
+    printf("THREAD: Blocked on read()\n");
+  
+    char buffer[1024];
+    int n = read(*newsock, buffer, 1024);
+  
+    if (n < 0)
+    {
+        perror("read() failed");
+        exit(EXIT_FAILURE);
+    }
+    
+    if (n == 0)
+    {
+      cout << "PARENT: Client closed" << endl;
+      free(newsock);
+      return NULL;
+    }
+  
+    printf("MESSAGE: '%s'\n", buffer);
+    char* resMsg = (char*)calloc(1, sizeof(char));
+    int resStat = readQuery(buffer, resMsg);
+  }
+  
+}
+
+int main()
 {
 
   int sock = socket(PF_INET, SOCK_STREAM, 0);
@@ -197,32 +245,31 @@ int main( )
 
   struct sockaddr_in client;
   int fromlen = sizeof(client);
-
-  int pid;
-  char buffer[1024];
+  
+  //vector<int*> sockets;
 
   while(1)
   {
+    
     printf("PARENT: Blocked on accept()\n");
 
     int newsock = accept(sock, (struct sockaddr*)&client, (socklen_t*)&fromlen);
-
-    printf("PARENT: Accepted client connection\n");
-
-    printf("THREAD: Blocked on read()\n");
-
-    bzero(buffer, 1024);
-    int n = read(newsock, buffer, 1024);
-
-    if (n < 0)
+    
+    int* arg = (int*)malloc(sizeof(int));
+    *arg = newsock;
+    //sockets.push_back(arg);
+    
+    pthread_t tid;
+    
+    int rc = pthread_create(&tid, NULL, clientListen, (void*)arg);
+    
+    if (rc != 0)
     {
-        perror("read() failed");
+        perror("pthread_create() failed");
         exit(EXIT_FAILURE);
     }
 
-    printf("MESSAGE: '%s'\n", buffer);
-    char* resMsg = (char*)calloc(1, sizeof(char));
-    int resStat = readQuery(buffer, resMsg);
+    printf("PARENT: Accepted client connection\n");
 
   }
 
