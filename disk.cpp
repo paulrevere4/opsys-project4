@@ -134,7 +134,7 @@ std::string Disk::storeFile(std::string filename,
           size,
           blocksNeeded,
           numClusters);
-      return "ACK";
+      return "ACK\n";
     }
   }
 }

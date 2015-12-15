@@ -109,6 +109,7 @@ bool command_store(char* query, int* socket, Disk* disk)
   while (bytesRead < bytes)
   {
     char chunk[1024];
+    bzero(chunk, 1024);
     int n = read(*socket, chunk, 1024);
   
     if (n < 0)
@@ -234,7 +235,6 @@ bool command_delete(char* query, int* socket, Disk* disk)
   }
   
   std::string filename = sections[1];
-  filename = filename.substr(0, filename.size()-1);
   
   // std::cout << "filename: " << filename << std::endl;
   
@@ -375,6 +375,7 @@ void* clientListen(void* arguments)
     // printf("THREAD: Blocked on read()\n");
   
     char buffer[1024];
+    bzero(buffer, 1024);
     int n = read(*socket, buffer, 1024);
   
     if (n < 0)
