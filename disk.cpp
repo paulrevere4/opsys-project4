@@ -95,7 +95,7 @@ std::string Disk::storeFile(std::string filename,
     else
     {
       char letter = allocateBlocks(filename, blocksNeeded);
-      std::ofstream outFile(".storage/" + filename);
+      std::ofstream outFile((".storage/" + filename).c_str());
       std::string outString = "";
       for ( int i = 0; i < size; i++ )
       {
@@ -120,7 +120,7 @@ std::string Disk::readFile(std::string filename,
   }
   else
   {
-    std::ifstream inFile(".storage/" + filename);
+    std::ifstream inFile((".storage/" + filename).c_str());
     std::stringstream ss;
     ss << inFile.rdbuf();
     std::string fileContents = ss.str();
@@ -181,7 +181,7 @@ std::string Disk::dir()
   }
   std::sort(fileNames.begin(), fileNames.end());
   char intBuff[11];
-  sprintf(intBuff, "%d", fileNames.size());
+  sprintf(intBuff, "%d", (int)fileNames.size());
   std::string returnString = std::string(intBuff) + "\n";
   for ( int i = 0; i < fileNames.size(); i++ )
   {
