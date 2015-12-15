@@ -76,7 +76,7 @@ std::string Disk::storeFile(std::string filename,
     int size,
     char* contents)
 {
-  if ( filesToLetters.find(filename) == filesToLetters.end() )
+  if ( filesToLetters.find(filename) != filesToLetters.end() )
   {
     return "ERROR: FILE EXISTS";
   }
@@ -95,7 +95,7 @@ std::string Disk::storeFile(std::string filename,
     {
       blocksLeft -= blocksNeeded;
       char letter = allocateBlocks(filename, blocksNeeded);
-      std::ofstream outFile(filename);
+      std::ofstream outFile(".storage/" + filename);
       std::string outString = "";
       for ( int i = 0; i < size; i++ )
       {
@@ -114,13 +114,13 @@ std::string Disk::readFile(std::string filename,
     int offset,
     int length)
 {
-  if ( filesToLetters.find(filename) != filesToLetters.end() )
+  if ( filesToLetters.find(filename) == filesToLetters.end() )
   {
     return "ERROR: NO SUCH FILE";
   }
   else
   {
-    std::ifstream inFile(filename);
+    std::ifstream inFile(".storage/" + filename);
     std::stringstream ss;
     ss << inFile.rdbuf();
     std::string fileContents = ss.str();
@@ -145,7 +145,7 @@ std::string Disk::readFile(std::string filename,
 //delete a file
 std::string Disk::deleteFile(std::string filename)
 {
-  if ( filesToLetters.find(filename) != filesToLetters.end() )
+  if ( filesToLetters.find(filename) == filesToLetters.end() )
   {
     return "ERROR: NO SUCH FILE";
   }

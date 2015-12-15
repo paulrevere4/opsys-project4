@@ -1,4 +1,5 @@
 // This the submission for Paul Revere(reverp) and Joseph Hitchcock(hitchj)
+
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
@@ -214,10 +215,29 @@ void* clientListen(void* argument)
   
 }
 
-int main()
+void testDisk()
 {
   Disk disk;
   disk.printCluster();
+
+  char str1[17] = "This is abc.txt\n";
+  std::cout << disk.storeFile("abc.txt", 16, &str1[0]) << std::endl;
+  disk.printCluster();
+  std::cout << disk.readFile("abc.txt", 0, 16) << std::endl;
+
+  char str2[17] = "This is xyz.txt\n";
+  std::cout << disk.storeFile("xyz.txt", 16, &str2[0]) << std::endl;
+  disk.printCluster();
+  std::cout << disk.readFile("xyz.txt", 0, 16) << std::endl;
+
+  std::cout << disk.deleteFile("xyz.txt") << std::endl;
+  disk.printCluster();
+}
+
+int main()
+{
+
+  testDisk();
 
   int sock = socket(PF_INET, SOCK_STREAM, 0);
 
