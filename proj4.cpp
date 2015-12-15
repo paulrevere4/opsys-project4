@@ -390,8 +390,18 @@ void* clientListen(void* arguments)
       free(socket);
       return NULL;
     }
+    
+    std::string command;
+    for (int i = 0; i < strlen(buffer); i++)
+    {
+      command += buffer[i];
+      if (buffer[i] == '\n')
+      {
+        break;
+      }
+    }
   
-    printf("[Thread %lu]: Rcvd %s", pthread_self(), buffer);
+    printf("[Thread %lu]: Rcvd %s", pthread_self(), command.c_str());
     char* resMsg = (char*)calloc(1, sizeof(char));
     int resStat = readQuery(buffer, resMsg, socket, disk);
   }
