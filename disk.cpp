@@ -74,6 +74,27 @@ char Disk::allocateBlocks(std::string filename, int blocksNeeded)
   return letter;
 }
 
+int Disk::getNumClusters(std::string filename)
+{
+  std::vector<int> blocks = filesToBlocks[filename];
+  if ( blocks.size() == 0)
+  {
+    return 0;
+  }
+  else
+  {
+    int numClusters = 1;
+    for ( int i = 1; i < blocks.size(); i++ )
+    {
+      if ( blocks[i] != (blocks[i-1]+1) )
+      {
+        numClusters++;
+      }
+    }
+    return numClusters;
+  }
+}
+
 //store a file
 //return the message the server should send back
 std::string Disk::storeFile(std::string filename,
@@ -106,9 +127,37 @@ std::string Disk::storeFile(std::string filename,
       }
       outFile << outString;
       filesToLetters[filename] = letter;
-      printf("[Thread %lu] Stored file '%c' (%d bytes; %d blocks; <FINISH> clusters)\n", pthread_self(), letter, size, blocksNeeded);
+      int numClusters = getNumClusters(filename);
+      printf("[Thread %lu] Stored file '%c' (%d bytes; %d blocks; %d clusters)\n",
+          pthread_self(),
+          letter,
+          size,
+          blocksNeeded,
+          numClusters);
       return "ACK";
     }
+  }
+}
+
+int Disk::getNumBlocksReadFrom(int offset, int length)
+{
+  if ( length + offset < blocksize && length != 0 )
+  {
+    return 1;
+  }
+  else
+  {
+    int blocks = 0;
+    if ( offset != 0 && offset % blocksize != 0 )
+    {
+      blocks++;
+    }
+    blocks += (length / blocksize);
+    if ( length > blocksize && length % blocksize != 0 )
+    {
+      blocks++;
+    }
+    return blocks;
   }
 }
 
@@ -141,7 +190,13 @@ std::string Disk::readFile(std::string filename,
       {
         returnString += fileContents[i];
       }
-      printf("[Thread %lu] Sent %d bytes (from <FINISH> '%c' blocks) from offset %d\n", pthread_self(), length, filesToLetters[filename], offset);
+      int numBlocksReadFrom = getNumBlocksReadFrom(offset, length);
+      printf("[Thread %lu] Sent %d bytes (from %d '%c' blocks) from offset %d\n",
+          pthread_self(),
+          length,
+          numBlocksReadFrom,
+          filesToLetters[filename],
+          offset);
       return returnString;
     }
   }

@@ -23,6 +23,8 @@ private:
 
   void incrementLetterIndex();
   char allocateBlocks(std::string filename, int blocksNeeded);
+  int getNumClusters(std::string filename);
+  int getNumBlocksReadFrom(int offset, int length);
   void deallocateBlocks(std::string filename);
 
 public:

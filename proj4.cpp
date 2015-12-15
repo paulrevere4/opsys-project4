@@ -666,6 +666,12 @@ void testDisk()
   std::cout << disk.deleteFile("def.txt") << std::endl;
   disk.printCluster();
 
+  // std::cout << "should say 1 => " << disk.getNumBlocksReadFrom(0, 1) << std::endl;
+  // std::cout << "should say 1 => " << disk.getNumBlocksReadFrom(0, 4092) << std::endl;
+  // std::cout << "should say 2 => " << disk.getNumBlocksReadFrom(1, 4092) << std::endl;
+  // std::cout << "should say 2 => " << disk.getNumBlocksReadFrom(0, 8192) << std::endl;
+  // std::cout << "should say 3 => " << disk.getNumBlocksReadFrom(1, 8192) << std::endl;
+
 }
 
 int main()
