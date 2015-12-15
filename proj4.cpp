@@ -119,7 +119,7 @@ bool command_store(char* query, int* socket, Disk* disk)
     
     if (n == 0)
     {
-      printf("[Thread %lu]: Client closed its socket....terminating\n", pthread_self());
+      printf("[Thread %lu] Client closed its socket....terminating\n", pthread_self());
       free(socket);
       return false;
     }
@@ -141,6 +141,7 @@ bool command_store(char* query, int* socket, Disk* disk)
   printf("[Thread %lu] Simulated Clustered Disk Space Allocation:\n", pthread_self());
   disk->printCluster();
   
+  write(*socket, output.c_str(), output.size());
   printf("[Thread %lu] Sent: %s\n", pthread_self(), output.c_str());
   
   return 0;
@@ -183,11 +184,21 @@ bool command_read(char* query, int* socket, Disk* disk)
   int offset = atoi(sections[2].c_str());
   int length = atoi(sections[3].c_str());
   
-  std::cout << "filename: " << filename << std::endl;
-  std::cout << "offset: " << offset << std::endl;
-  std::cout << "length: " << length << std::endl;
+  // std::cout << "filename: " << filename << std::endl;
+  // std::cout << "offset: " << offset << std::endl;
+  // std::cout << "length: " << length << std::endl;
   
-  disk->readFile(filename, offset, length);
+  std::string output = disk->readFile(filename, offset, length);
+  std::string serverOutput;
+  for (int i = 0 ; i < output.size(); i++)
+  {
+    if (output[i] == '\n') break;
+    serverOutput += output[i];
+  }
+  
+  write(*socket, output.c_str(), output.size());
+  printf("[Thread %lu] Sent: %s\n", pthread_self(), serverOutput.c_str());
+  cout << "Finished" << endl;
   
   return 0;
 }
@@ -302,7 +313,6 @@ int readQuery(char* query, char* destination, int* socket, Disk* disk)
   else if ( queryType == "READ" )
   {
     //READ
-    printf("READ\n");
     command_read(query, socket, disk);
   }
   else if ( queryType == "DELETE" )

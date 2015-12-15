@@ -106,6 +106,7 @@ std::string Disk::storeFile(std::string filename,
       }
       outFile << outString;
       filesToLetters[filename] = letter;
+      printf("[Thread %lu] Stored file '%c' (%d bytes; %d blocks; <FINISH> clusters)\n", pthread_self(), letter, size, blocksNeeded);
       return "ACK";
     }
   }
@@ -140,6 +141,7 @@ std::string Disk::readFile(std::string filename,
       {
         returnString += fileContents[i];
       }
+      printf("[Thread %lu] Sent %d bytes (from <FINISH> '%c' blocks) from offset %d\n", pthread_self(), length, filesToLetters[filename], offset);
       return returnString;
     }
   }
