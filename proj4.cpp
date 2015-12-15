@@ -119,7 +119,7 @@ bool command_store(char* query, int* socket, Disk* disk)
     
     if (n == 0)
     {
-      printf("[Thread %u]: Client closed its socket....terminating\n", (unsigned)pthread_self());
+      printf("[Thread %lu]: Client closed its socket....terminating\n", pthread_self());
       free(socket);
       return false;
     }
@@ -138,10 +138,10 @@ bool command_store(char* query, int* socket, Disk* disk)
   
   std::string output = disk->storeFile(filename, bytes, file.c_str());
   
-  printf("[Thread %u] Simulated Clustered Disk Space Allocation:\n", (unsigned)pthread_self());
+  printf("[Thread %lu] Simulated Clustered Disk Space Allocation:\n", pthread_self());
   disk->printCluster();
   
-  printf("[Thread %u] Sent: %s\n", (unsigned)pthread_self(), output.c_str());
+  printf("[Thread %lu] Sent: %s\n", pthread_self(), output.c_str());
   
   return 0;
 }
@@ -356,12 +356,12 @@ void* clientListen(void* arguments)
     
     if (n == 0)
     {
-      printf("[Thread %u]: Client closed its socket....terminating\n", (unsigned)pthread_self());
+      printf("[Thread %lu]: Client closed its socket....terminating\n", pthread_self());
       free(socket);
       return NULL;
     }
   
-    printf("[Thread %u]: Rcvd %s", (unsigned)pthread_self(), buffer);
+    printf("[Thread %lu]: Rcvd %s", pthread_self(), buffer);
     char* resMsg = (char*)calloc(1, sizeof(char));
     int resStat = readQuery(buffer, resMsg, socket, disk);
   }
@@ -712,6 +712,7 @@ int main()
     input* in = (input*)malloc(sizeof(input));
     in->disk = &disk;
     in->socket = socket;
+    
     
     pthread_t tid;
     
