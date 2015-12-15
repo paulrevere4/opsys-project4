@@ -82,7 +82,7 @@ std::string Disk::storeFile(std::string filename,
 {
   if ( filesToLetters.find(filename) != filesToLetters.end() )
   {
-    return "ERROR: FILE EXISTS";
+    return "ERROR: FILE EXISTS\n";
   }
   else
   {
@@ -93,7 +93,7 @@ std::string Disk::storeFile(std::string filename,
     }
     if ( blocksNeeded > blocksLeft )
     {
-      return "ERROR: INSUFFICIENT DISK SPACE";
+      return "ERROR: INSUFFICIENT DISK SPACE\n";
     }
     else
     {
@@ -107,7 +107,7 @@ std::string Disk::storeFile(std::string filename,
       outFile << outString;
       filesToLetters[filename] = letter;
       printf("[Thread %lu] Stored file '%c' (%d bytes; %d blocks; <FINISH> clusters)\n", pthread_self(), letter, size, blocksNeeded);
-      return "ACK";
+      return "ACK\n";
     }
   }
 }
@@ -120,7 +120,7 @@ std::string Disk::readFile(std::string filename,
 {
   if ( filesToLetters.find(filename) == filesToLetters.end() )
   {
-    return "ERROR: NO SUCH FILE";
+    return "ERROR: NO SUCH FILE\n";
   }
   else
   {
@@ -130,7 +130,7 @@ std::string Disk::readFile(std::string filename,
     std::string fileContents = ss.str();
     if ( fileContents.length() < offset + length )
     {
-      return "ERROR: INVALID BYTE RANGE";
+      return "ERROR: INVALID BYTE RANGE\n";
     }
     else
     {
@@ -162,16 +162,17 @@ std::string Disk::deleteFile(std::string filename)
 {
   if ( filesToLetters.find(filename) == filesToLetters.end() )
   {
-    return "ERROR: NO SUCH FILE";
+    return "ERROR: NO SUCH FILE\n";
   }
   else
   {
+    printf("[Thread %lu] Deleted %s file '%c' (deallocated %lu blocks)\n", pthread_self(), filename.c_str(), filesToLetters[filename], filesToBlocks[filename].size());
     std::string command = "rm .storage/" + filename;
     system(command.c_str());
     deallocateBlocks(filename);
     filesToBlocks.erase(filename);
     filesToLetters.erase(filename);
-    return "ACK";
+    return "ACK\n";
   }
 }
 

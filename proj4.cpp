@@ -142,7 +142,7 @@ bool command_store(char* query, int* socket, Disk* disk)
   disk->printCluster();
   
   write(*socket, output.c_str(), output.size());
-  printf("[Thread %lu] Sent: %s\n", pthread_self(), output.c_str());
+  printf("[Thread %lu] Sent: %s", pthread_self(), output.c_str());
   
   return 0;
 }
@@ -192,13 +192,15 @@ bool command_read(char* query, int* socket, Disk* disk)
   std::string serverOutput;
   for (int i = 0 ; i < output.size(); i++)
   {
-    if (output[i] == '\n') break;
     serverOutput += output[i];
+    if (output[i] == '\n') 
+    {
+      break;
+    }
   }
   
   write(*socket, output.c_str(), output.size());
-  printf("[Thread %lu] Sent: %s\n", pthread_self(), serverOutput.c_str());
-  cout << "Finished" << endl;
+  printf("[Thread %lu] Sent: %s", pthread_self(), serverOutput.c_str());
   
   return 0;
 }
@@ -232,10 +234,17 @@ bool command_delete(char* query, int* socket, Disk* disk)
   }
   
   std::string filename = sections[1];
+  filename = filename.substr(0, filename.size()-1);
   
-  std::cout << "filename: " << filename << std::endl;
+  // std::cout << "filename: " << filename << std::endl;
   
-  disk->deleteFile(filename);
+  std::string output = disk->deleteFile(filename);
+  
+  printf("[Thread %lu] Simulated Clustered Disk Space Allocation:\n", pthread_self());
+  disk->printCluster();
+  
+  write(*socket, output.c_str(), output.size());
+  printf("[Thread %lu] Sent: %s", pthread_self(), output.c_str());
   
   return 0;
 }
@@ -257,7 +266,19 @@ returns
 bool command_dir(char* query, int* socket, Disk* disk)
 {
   
-  disk->dir();
+  std::string output = disk->dir();
+  
+  std::vector<std::string> sections;
+  std::stringstream sstream(output.c_str());
+  std::string split;
+
+  while(getline(sstream, split, '\n'))
+  {
+    sections.push_back(split);
+  }
+  
+  write(*socket, output.c_str(), output.size());
+  printf("[Thread %lu] Sent directory listing for %s files\n", pthread_self(), sections[0].c_str());
   
   return 0;
 }
@@ -318,13 +339,11 @@ int readQuery(char* query, char* destination, int* socket, Disk* disk)
   else if ( queryType == "DELETE" )
   {
     //DELETE
-    printf("DELETE\n");
     command_delete(query, socket, disk);
   }
   else if ( queryType == "DIR" )
   {
     //DIR
-    printf("DIR\n");
     command_dir(query, socket, disk);
   }
   else
