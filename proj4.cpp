@@ -13,13 +13,14 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <sstream>
 using namespace std;
 
 #include "disk.h"
 
 typedef struct input {
-  char* contents;
-  int   socket;
+  Disk* disk;
+  int*  socket;
 } input;
 
 /**
@@ -36,8 +37,112 @@ returns
 // -- if the file already exists, return an "ERROR: FILE EXISTS\n" error
 // -- in general, return "ERROR: <error-description>\n" if unsuccessful
 // -- return "ACK\n" if successful
-bool command_store(char* query)
+bool command_store(char* query, int* socket, Disk* disk)
 {
+  
+  bool inCommand = true;
+  bool inFilename = false;
+  bool inBytes = false;
+  
+  std::string filename;
+  std::string file;
+  
+  std::string bytesString;
+  int bytes;
+  
+  unsigned int i;
+  for (i = 0; i < strlen(query); i++)
+  {
+    
+    // cout << query[i] << endl;
+    // cout << "  inCommand: " << inCommand << endl;
+    // cout << "  inFilename: " << inFilename << endl;
+    // cout << "  inBytes: " << inBytes << endl;
+    
+    if (query[i] == ' ')
+    {
+      if (inCommand)
+      {
+        inCommand = false;
+        inFilename = true;
+      }
+      else if (inFilename)
+      {
+        inFilename = false;
+        inBytes = true;
+      }
+    }
+    
+    else
+    {
+      if (query[i] == '\n')
+      {
+        // check if there's more after later on?
+        i += 1;
+        break;
+      }
+      
+      if (inFilename)
+      {
+        filename += query[i];
+      }
+      
+      if (inBytes)
+      {
+        bytesString += query[i];
+      }
+    }
+    
+    
+  }
+  
+  bytes = atoi(bytesString.c_str());
+  
+  int bytesRead = 0;
+  
+  for (; i < strlen(query); i++)
+  {
+    file += query[i];
+    bytesRead += 1;
+  }
+  
+  while (bytesRead < bytes)
+  {
+    char chunk[1024];
+    int n = read(*socket, chunk, 1024);
+  
+    if (n < 0)
+    {
+        perror("read() failed");
+        exit(EXIT_FAILURE);
+    }
+    
+    if (n == 0)
+    {
+      printf("[Thread %u]: Client closed its socket....terminating\n", (unsigned)pthread_self());
+      free(socket);
+      return false;
+    }
+    
+    for (i = 0; i < n; i++)
+    {
+      file += chunk[i];
+      bytesRead += 1;
+    }
+
+  }
+  
+  // std::cout << "filename: " << filename << std::endl;
+  // std::cout << "bytes: " << bytes << std::endl;
+  // std::cout << "file: " << "|" << file << "|" << std::endl;
+  
+  std::string output = disk->storeFile(filename, bytes, file.c_str());
+  
+  printf("[Thread %u] Simulated Clustered Disk Space Allocation:\n", (unsigned)pthread_self());
+  disk->printCluster();
+  
+  printf("[Thread %u] Sent: %s\n", (unsigned)pthread_self(), output.c_str());
+  
   return 0;
 }
 
@@ -60,8 +165,30 @@ returns
 // -- in general, return "ERROR: <error-description>\n" if unsuccessful
 // -- return "ACK" if successful, following it with the length and data, as follows:
 //    ACK <bytes>\n<file-excerpt>
-bool command_read(char* query, char* destination)
+bool command_read(char* query, int* socket, Disk* disk)
 {
+  std::string input(query);
+  input = input.substr(0, input.size()-1);
+  
+  std::vector<std::string> sections;
+  std::stringstream sstream(input.c_str());
+  std::string split;
+
+  while(getline(sstream, split, ' '))
+  {
+    sections.push_back(split);
+  }
+  
+  std::string filename = sections[1];
+  int offset = atoi(sections[2].c_str());
+  int length = atoi(sections[3].c_str());
+  
+  std::cout << "filename: " << filename << std::endl;
+  std::cout << "offset: " << offset << std::endl;
+  std::cout << "length: " << length << std::endl;
+  
+  disk->readFile(filename, offset, length);
+  
   return 0;
 }
 
@@ -78,8 +205,27 @@ returns
 // -- if the file does not exist, return an "ERROR: NO SUCH FILE\n" error
 // -- in general, return "ERROR: <error-description>\n" if unsuccessful
 // -- return "ACK\n" if successful
-bool command_delete(char* query)
+bool command_delete(char* query, int* socket, Disk* disk)
 {
+  
+  std::string input(query);
+  input = input.substr(0, input.size()-1);
+  
+  std::vector<std::string> sections;
+  std::stringstream sstream(input.c_str());
+  std::string split;
+
+  while(getline(sstream, split, ' '))
+  {
+    sections.push_back(split);
+  }
+  
+  std::string filename = sections[1];
+  
+  std::cout << "filename: " << filename << std::endl;
+  
+  disk->deleteFile(filename);
+  
   return 0;
 }
 
@@ -97,8 +243,11 @@ returns
 // -- the format of the message containing the list of files is as follows:
 // <number-of-files>\n<filename1>\n<filename2>\n...\n
 // -- therefore, if no files are stored, "0\n" is returned
-bool command_dir(char* query)
+bool command_dir(char* query, int* socket, Disk* disk)
 {
+  
+  disk->dir();
+  
   return 0;
 }
 
@@ -142,28 +291,31 @@ args
 returns
   -int - size of the string <destination>
 */
-int readQuery(char* query, char* destination)
+int readQuery(char* query, char* destination, int* socket, Disk* disk)
 {
   std::string queryType = getQueryType(query);
   if ( queryType == "STORE" )
   {
     //STORE
-    printf("STORE\n");
+    command_store(query, socket, disk);
   }
   else if ( queryType == "READ" )
   {
     //READ
     printf("READ\n");
+    command_read(query, socket, disk);
   }
   else if ( queryType == "DELETE" )
   {
     //DELETE
     printf("DELETE\n");
+    command_delete(query, socket, disk);
   }
   else if ( queryType == "DIR" )
   {
     //DIR
     printf("DIR\n");
+    command_dir(query, socket, disk);
   }
   else
   {
@@ -182,18 +334,19 @@ args
 returns
   -exits once read() call returns 0 (client exits)
 */
-void* clientListen(void* argument)
+void* clientListen(void* arguments)
 {
-  
-  int* newsock = (int*)argument;
+  input* args = (input*) arguments;
+  int* socket = args->socket;
+  Disk* disk = args->disk;
   
   while(1)
   {
   
-    printf("THREAD: Blocked on read()\n");
+    // printf("THREAD: Blocked on read()\n");
   
     char buffer[1024];
-    int n = read(*newsock, buffer, 1024);
+    int n = read(*socket, buffer, 1024);
   
     if (n < 0)
     {
@@ -203,14 +356,14 @@ void* clientListen(void* argument)
     
     if (n == 0)
     {
-      cout << "PARENT: Client closed" << endl;
-      free(newsock);
+      printf("[Thread %u]: Client closed its socket....terminating\n", (unsigned)pthread_self());
+      free(socket);
       return NULL;
     }
   
-    printf("MESSAGE: '%s'\n", buffer);
+    printf("[Thread %u]: Rcvd %s", (unsigned)pthread_self(), buffer);
     char* resMsg = (char*)calloc(1, sizeof(char));
-    int resStat = readQuery(buffer, resMsg);
+    int resStat = readQuery(buffer, resMsg, socket, disk);
   }
   
 }
@@ -508,7 +661,9 @@ void testDisk()
 int main()
 {
 
-  testDisk();
+  //testDisk();
+  
+  Disk disk;
 
   int sock = socket(PF_INET, SOCK_STREAM, 0);
 
@@ -534,7 +689,7 @@ int main()
   }
 
   listen(sock, 5);
-  printf("PARENT: Listener bound to port %d\n", listener_port);
+  printf("Listening on port %d\n", listener_port);
 
   struct sockaddr_in client;
   int fromlen = sizeof(client);
@@ -544,25 +699,29 @@ int main()
   while(1)
   {
     
-    printf("PARENT: Blocked on accept()\n");
+    //printf("PARENT: Blocked on accept()\n");
 
     int newsock = accept(sock, (struct sockaddr*)&client, (socklen_t*)&fromlen);
+    //cout << client.sin_addr.s_addr << endl;
+    //printf("Received incoming connection from %s\n", inet_ntoa(client.sin_addr.s_addr));
+    printf("Received incoming connection\n");
     
-    int* arg = (int*)malloc(sizeof(int));
-    *arg = newsock;
-    //sockets.push_back(arg);
+    int* socket = (int*)malloc(sizeof(int));
+    *socket = newsock;
+    
+    input* in = (input*)malloc(sizeof(input));
+    in->disk = &disk;
+    in->socket = socket;
     
     pthread_t tid;
     
-    int rc = pthread_create(&tid, NULL, clientListen, (void*)arg);
+    int rc = pthread_create(&tid, NULL, clientListen, (void*)in);
     
     if (rc != 0)
     {
         perror("pthread_create() failed");
         exit(EXIT_FAILURE);
     }
-
-    printf("PARENT: Accepted client connection\n");
 
   }
 

@@ -22,6 +22,9 @@ Disk::Disk()
   system("rm -rf .storage");
   system("mkdir .storage");
 
+  std::cout << "Block size is " << blocksize << std::endl;
+  std::cout << "Number of blocks is " << n_blocks << std::endl;
+
 }
 
 //destructor
@@ -75,7 +78,7 @@ char Disk::allocateBlocks(std::string filename, int blocksNeeded)
 //return the message the server should send back
 std::string Disk::storeFile(std::string filename,
     int size,
-    char* contents)
+    const char* contents)
 {
   if ( filesToLetters.find(filename) != filesToLetters.end() )
   {

@@ -32,7 +32,7 @@ public:
 	void printCluster(); //print
 	std::string storeFile(std::string filename, //store a file
       int size,
-      char* contents);
+      const char* contents);
   std::string readFile(std::string filename, //read contents from a file,
       int offset,              // read length bytes starting at the offset
       int length);
