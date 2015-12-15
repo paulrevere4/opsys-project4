@@ -738,9 +738,9 @@ int main()
     //printf("PARENT: Blocked on accept()\n");
 
     int newsock = accept(sock, (struct sockaddr*)&client, (socklen_t*)&fromlen);
-    //cout << client.sin_addr.s_addr << endl;
-    //printf("Received incoming connection from %s\n", inet_ntoa(client.sin_addr.s_addr));
-    printf("Received incoming connection\n");
+    cout << client.sin_addr.s_addr << endl;
+    printf("Received incoming connection from %s\n", inet_ntoa(client.sin_addr));
+    //printf("Received incoming connection\n");
     
     int* socket = (int*)malloc(sizeof(int));
     *socket = newsock;
