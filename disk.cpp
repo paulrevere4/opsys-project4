@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 #include <sstream>
-#include <set>
+#include <map>
 #include <fstream>
 #include <algorithm>
 
@@ -15,7 +15,10 @@
 //constructor
 Disk::Disk()
 {
+  letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   allocation = std::vector<char>(128, '.');
+  blocksLeft = n_blocks;
+  letterIndex = 0;
   system("rm -rf .storage");
   system("mkdir .storage");
 
@@ -41,27 +44,67 @@ void Disk::printCluster()
   std::cout << "================================" << std::endl;
 }
 
+void Disk::incrementLetterIndex()
+{
+  letterIndex++;
+  if ( letterIndex == letters.length() )
+  {
+    letterIndex = 0;
+  }
+}
+
+char Disk::allocateBlocks(std::string filename, int blocksNeeded)
+{
+  char letter = letters[letterIndex];
+  incrementLetterIndex();
+  filesToBlocks[filename] = std::vector<int>();
+  for ( int i = 0; i < allocation.size() && blocksNeeded > 0; i++ )
+  {
+    if ( allocation[i] == '.' )
+    {
+      allocation[i] = letter;
+      filesToBlocks[filename].push_back(i);
+      blocksNeeded--;
+    }
+  }
+  return letter;
+}
+
 //store a file
 //return the message the server should send back
 std::string Disk::storeFile(std::string filename,
     int size,
     char* contents)
 {
-  if ( files.find(filename) == files.end() )
+  if ( filesToLetters.find(filename) == filesToLetters.end() )
   {
     return "ERROR: FILE EXISTS";
   }
   else
   {
-    std::ofstream outFile(filename);
-    std::string outString = "";
-    for ( int i = 0; i < size; i++ )
+    int blocksNeeded = size/blocksize;
+    if ( (blocksNeeded * blocksize) < size )
     {
-      outString += contents[i];
+      blocksNeeded++;
     }
-    outFile << outString;
-    files.insert(filename);
-    return "ACK";
+    if ( blocksNeeded > blocksLeft )
+    {
+      return "ERROR: INSUFFICIENT DISK SPACE";
+    }
+    else
+    {
+      blocksLeft -= blocksNeeded;
+      char letter = allocateBlocks(filename, blocksNeeded);
+      std::ofstream outFile(filename);
+      std::string outString = "";
+      for ( int i = 0; i < size; i++ )
+      {
+        outString += contents[i];
+      }
+      outFile << outString;
+      filesToLetters[filename] = letter;
+      return "ACK";
+    }
   }
 }
 
@@ -71,7 +114,7 @@ std::string Disk::readFile(std::string filename,
     int offset,
     int length)
 {
-  if ( files.find(filename) != files.end() )
+  if ( filesToLetters.find(filename) != filesToLetters.end() )
   {
     return "ERROR: NO SUCH FILE";
   }
@@ -85,21 +128,24 @@ std::string Disk::readFile(std::string filename,
     {
       return "ERROR: INVALID BYTE RANGE";
     }
-    char intBuff[11];
-    sprintf(intBuff, "%d", length);
-    std::string returnString = "ACK " + std::string(intBuff) + "\n";
-    for ( int i = offset; i < offset + length; i++ )
+    else
     {
-      returnString += fileContents[i];
+      char intBuff[11];
+      sprintf(intBuff, "%d", length);
+      std::string returnString = "ACK " + std::string(intBuff) + "\n";
+      for ( int i = offset; i < offset + length; i++ )
+      {
+        returnString += fileContents[i];
+      }
+      return returnString;
     }
-    return returnString;
   }
 }
 
 //delete a file
 std::string Disk::deleteFile(std::string filename)
 {
-  if ( files.find(filename) != files.end() )
+  if ( filesToLetters.find(filename) != filesToLetters.end() )
   {
     return "ERROR: NO SUCH FILE";
   }
@@ -107,6 +153,7 @@ std::string Disk::deleteFile(std::string filename)
   {
     std::string command = "rm .storage/" + filename;
     system(command.c_str());
+    filesToLetters.erase(filename);
     return "ACK";
   }
 }
@@ -115,10 +162,10 @@ std::string Disk::deleteFile(std::string filename)
 std::string Disk::dir()
 {
   std::vector<std::string> fileNames;
-  std::set<std::string>::iterator itr;
-  for ( itr = files.begin(); itr != files.end(); itr++ )
+  std::map<std::string, char>::iterator itr;
+  for ( itr = filesToLetters.begin(); itr != filesToLetters.end(); itr++ )
   {
-    fileNames.push_back(*itr);
+    fileNames.push_back(itr->first);
   }
   std::sort(fileNames.begin(), fileNames.end());
   char intBuff[11];

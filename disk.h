@@ -6,14 +6,23 @@
 // File system for Opsys Project 4
 #include <vector>
 #include <string>
-#include <set>
+#include <map>
 
 class Disk
 {
 private:
 
+  const static int n_blocks = 128;
+  const static int blocksize = 4096;
+  std::string letters;
+  int blocksLeft;
+  int letterIndex;
   std::vector<char> allocation;
-  std::set<std::string> files;
+  std::map<std::string, char> filesToLetters;
+  std::map<std::string, std::vector<int> > filesToBlocks;
+
+  void incrementLetterIndex();
+  char allocateBlocks(std::string filename, int blocksNeeded);
 
 public:
 
