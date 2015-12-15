@@ -55,6 +55,7 @@ void Disk::incrementLetterIndex()
 
 char Disk::allocateBlocks(std::string filename, int blocksNeeded)
 {
+  blocksLeft -= blocksNeeded;
   char letter = letters[letterIndex];
   incrementLetterIndex();
   filesToBlocks[filename] = std::vector<int>();
@@ -93,7 +94,6 @@ std::string Disk::storeFile(std::string filename,
     }
     else
     {
-      blocksLeft -= blocksNeeded;
       char letter = allocateBlocks(filename, blocksNeeded);
       std::ofstream outFile(".storage/" + filename);
       std::string outString = "";
@@ -142,6 +142,16 @@ std::string Disk::readFile(std::string filename,
   }
 }
 
+void Disk::deallocateBlocks(std::string filename)
+{
+  std::vector<int> blocksToDeallocate = filesToBlocks[filename];
+  for ( int i = 0; i < blocksToDeallocate.size(); i++ )
+  {
+    allocation[blocksToDeallocate[i]] = '.';
+  }
+  blocksLeft += blocksToDeallocate.size();
+}
+
 //delete a file
 std::string Disk::deleteFile(std::string filename)
 {
@@ -153,6 +163,8 @@ std::string Disk::deleteFile(std::string filename)
   {
     std::string command = "rm .storage/" + filename;
     system(command.c_str());
+    deallocateBlocks(filename);
+    filesToBlocks.erase(filename);
     filesToLetters.erase(filename);
     return "ACK";
   }

@@ -230,6 +230,7 @@ void testDisk()
   disk.printCluster();
   std::cout << disk.readFile("xyz.txt", 0, 16) << std::endl;
 
+  std::cout << disk.deleteFile("abc.txt") << std::endl;
   std::cout << disk.deleteFile("xyz.txt") << std::endl;
   disk.printCluster();
 }
