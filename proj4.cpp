@@ -401,7 +401,7 @@ void* clientListen(void* arguments)
       }
     }
   
-    printf("[Thread %lu]: Rcvd %s", pthread_self(), command.c_str());
+    printf("[Thread %lu] Rcvd: %s", pthread_self(), command.c_str());
     char* resMsg = (char*)calloc(1, sizeof(char));
     int resStat = readQuery(buffer, resMsg, socket, disk);
   }
