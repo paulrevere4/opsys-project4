@@ -323,7 +323,7 @@ args
 returns
   -int - size of the string <destination>
 */
-int readQuery(char* query, char* destination, int* socket, Disk* disk)
+int readQuery(char* query, int* socket, Disk* disk)
 {
   std::string queryType = getQueryType(query);
   if ( queryType == "STORE" )
@@ -388,6 +388,7 @@ void* clientListen(void* arguments)
     {
       printf("[Thread %lu]: Client closed its socket....terminating\n", pthread_self());
       free(socket);
+      free(args);
       return NULL;
     }
     
@@ -402,8 +403,7 @@ void* clientListen(void* arguments)
     }
   
     printf("[Thread %lu] Rcvd: %s", pthread_self(), command.c_str());
-    char* resMsg = (char*)calloc(1, sizeof(char));
-    int resStat = readQuery(buffer, resMsg, socket, disk);
+    int resStat = readQuery(buffer, socket, disk);
   }
   
 }
