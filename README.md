@@ -2,10 +2,13 @@
 Some Clustered Disk Space Allocation and Network Programming
 
 complile with:
-g++ *.cpp -o server -pthread
+```
+$ g++ *.cpp -o server -pthread
+```
 
-run as:
-./server
+run as: 
+```
+$ ./server
+```
 
-client connect to:
-localhost:8765
+client connect to: `localhost:8765`
